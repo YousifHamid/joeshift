@@ -83,7 +83,7 @@ export const GameHud: React.FC<GameHudProps> = ({
 
         {state.isBoosting && (
           <View style={[styles.statPill, styles.boostPill]}>
-            <Text style={styles.boostText}>⚡ NITRO</Text>
+            <Text style={styles.boostText}>NITRO</Text>
           </View>
         )}
 
@@ -103,7 +103,7 @@ export const GameHud: React.FC<GameHudProps> = ({
             disabled={state.ammo <= 0}
             hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
           >
-            <Text style={styles.fireIcon}>💥</Text>
+            <Text style={styles.fireIcon}>▲</Text>
             <Text style={styles.fireLabel}>BLASTER</Text>
             <View style={styles.ammoBadge}>
               <Text style={styles.ammoText}>{state.ammo}</Text>
@@ -370,7 +370,10 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(30, 30, 30, 0.5)',
   },
   fireIcon: {
-    fontSize: 11,
+    fontFamily: 'monospace',
+    fontSize: 9,
+    fontWeight: '900',
+    color: '#ffaa00',
   },
   fireLabel: {
     fontFamily: 'monospace',

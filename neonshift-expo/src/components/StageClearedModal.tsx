@@ -34,7 +34,7 @@ export const StageClearedModal: React.FC<StageClearedModalProps> = ({
         {/* Hero Showcase (Trophy + Stage Score) */}
         <View style={styles.heroBox}>
           <View style={styles.trophyCircle}>
-            <Text style={styles.trophyIcon}>🏆</Text>
+            <Text style={styles.trophyIcon}>★</Text>
           </View>
           <Text style={styles.scoreVal}>{score.toLocaleString()}</Text>
           <Text style={styles.scoreLabel}>TOTAL POINTS</Text>
@@ -61,21 +61,21 @@ export const StageClearedModal: React.FC<StageClearedModalProps> = ({
           <View style={styles.rewardTokensRow}>
             {/* Cyber Credits */}
             <View style={styles.rewardToken}>
-              <Text style={styles.tokenIcon}>⚡</Text>
+              <Text style={styles.tokenIcon}>CR</Text>
               <Text style={styles.tokenVal}>+{creditsBonus}</Text>
               <Text style={styles.tokenSub}>CREDITS</Text>
             </View>
 
             {/* Plasma Ammo */}
             <View style={styles.rewardToken}>
-              <Text style={styles.tokenIcon}>💥</Text>
+              <Text style={[styles.tokenIcon, { color: Colors.neonCyan }]}>AMMO</Text>
               <Text style={styles.tokenVal}>+2</Text>
-              <Text style={styles.tokenSub}>AMMO</Text>
+              <Text style={styles.tokenSub}>BLASTER</Text>
             </View>
 
             {/* Clear Bonus */}
             <View style={styles.rewardToken}>
-              <Text style={styles.tokenIcon}>⭐</Text>
+              <Text style={styles.tokenIcon}>PTS</Text>
               <Text style={styles.tokenVal}>+500</Text>
               <Text style={styles.tokenSub}>BONUS</Text>
             </View>
@@ -167,7 +167,10 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   trophyIcon: {
-    fontSize: 30,
+    fontFamily: 'monospace',
+    fontSize: 26,
+    fontWeight: '900',
+    color: Colors.neonGold,
   },
   scoreVal: {
     fontFamily: 'monospace',
@@ -255,7 +258,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   tokenIcon: {
-    fontSize: 18,
+    fontFamily: 'monospace',
+    fontSize: 10,
+    fontWeight: '900',
+    color: Colors.neonGold,
+    letterSpacing: 0.5,
     marginBottom: 2,
   },
   tokenVal: {

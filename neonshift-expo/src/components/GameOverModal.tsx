@@ -61,13 +61,13 @@ export const GameOverModal: React.FC<GameOverModalProps> = ({
         {/* Clean 3-Item Capsule Stat Bar (Matching reference app capsule style) */}
         <View style={styles.statCapsuleRow}>
           <View style={styles.statCapsule}>
-            <Text style={styles.statCapsuleIcon}>📍</Text>
+            <Text style={styles.statCapsuleIcon}>DIST</Text>
             <Text style={styles.statCapsuleVal}>{state.distanceMeters}m</Text>
-            <Text style={styles.statCapsuleLabel}>DISTANCE</Text>
+            <Text style={styles.statCapsuleLabel}>STAGE {state.currentStage}</Text>
           </View>
 
           <View style={styles.statCapsule}>
-            <Text style={styles.statCapsuleIcon}>⚡</Text>
+            <Text style={[styles.statCapsuleIcon, { color: Colors.neonGold }]}>CR</Text>
             <Text style={[styles.statCapsuleVal, { color: Colors.neonGold }]}>
               +{creditsEarned}
             </Text>
@@ -75,11 +75,11 @@ export const GameOverModal: React.FC<GameOverModalProps> = ({
           </View>
 
           <View style={styles.statCapsule}>
-            <Text style={styles.statCapsuleIcon}>🔥</Text>
+            <Text style={[styles.statCapsuleIcon, { color: Colors.neonMagenta }]}>COMBO</Text>
             <Text style={[styles.statCapsuleVal, { color: Colors.neonMagenta }]}>
               x{state.maxCombo.toFixed(1)}
             </Text>
-            <Text style={styles.statCapsuleLabel}>COMBO</Text>
+            <Text style={styles.statCapsuleLabel}>PEAK</Text>
           </View>
         </View>
 
@@ -87,7 +87,7 @@ export const GameOverModal: React.FC<GameOverModalProps> = ({
         {claimedReward && (
           <View style={styles.claimedPill}>
             <Text style={styles.claimedText}>
-              🎉 +250 CREDITS & NITRO BOOST ARMED FOR NEXT RUN!
+              [PERK ARMED] +500 CREDITS & NITRO BOOST READY FOR NEXT RUN!
             </Text>
           </View>
         )}
@@ -112,7 +112,7 @@ export const GameOverModal: React.FC<GameOverModalProps> = ({
               activeOpacity={0.8}
             >
               <Text style={styles.beatScoreBtnText}>
-                {claimedReward ? '🏆 SHARE SCORE' : '🏆 BEAT MY SCORE (+250)'}
+                {claimedReward ? 'SHARE SCORE' : 'BEAT MY SCORE (+500)'}
               </Text>
             </TouchableOpacity>
 
@@ -268,7 +268,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   statCapsuleIcon: {
-    fontSize: 16,
+    fontFamily: 'monospace',
+    fontSize: 10,
+    fontWeight: '900',
+    color: Colors.neonCyan,
+    letterSpacing: 1,
     marginBottom: 2,
   },
   statCapsuleVal: {

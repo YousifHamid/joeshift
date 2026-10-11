@@ -29,7 +29,9 @@ const STORAGE_KEYS = {
   UNLOCKED_SKINS: 'neonshift_unlocked_skins',
   EQUIPPED_SKIN: 'neonshift_equipped_skin',
   HEADSTART_NITRO: 'neonshift_headstart_nitro',
-  SHARE_COUNT: 'neonshift_share_count',
+  SAVED_STAGE: 'neonshift_saved_stage',
+  HIGHEST_STAGE: 'neonshift_highest_stage',
+  INVITE_COUNT: 'neonshift_invite_count',
 };
 
 const DEFAULT_SETTINGS: GameSettings = {
@@ -209,10 +211,53 @@ export class LocalGameRepository {
     } catch {}
   }
 
-  // --- Share & Referrals System ---
+  // --- Stage Progression & Persistence ---
+  public static async getSavedStage(): Promise<number> {
+    try {
+      const val = await AsyncStorage.getItem(STORAGE_KEYS.SAVED_STAGE);
+      return val ? Math.max(1, parseInt(val, 10) || 1) : 1;
+    } catch {
+      return 1;
+    }
+  }
+
+  public static async getHighestStage(): Promise<number> {
+    try {
+      const val = await AsyncStorage.getItem(STORAGE_KEYS.HIGHEST_STAGE);
+      return val ? Math.max(1, parseInt(val, 10) || 1) : 1;
+    } catch {
+      return 1;
+    }
+  }
+
+  public static async saveStageProgress(stage: number): Promise<{
+    savedStage: number;
+    highestStage: number;
+  }> {
+    const validStage = Math.max(1, Math.floor(stage));
+    try {
+      const currentHighest = await this.getHighestStage();
+      const newHighest = Math.max(currentHighest, validStage);
+      await AsyncStorage.setItem(STORAGE_KEYS.SAVED_STAGE, validStage.toString());
+      if (newHighest > currentHighest) {
+        await AsyncStorage.setItem(STORAGE_KEYS.HIGHEST_STAGE, newHighest.toString());
+      }
+      return { savedStage: validStage, highestStage: newHighest };
+    } catch {
+      return { savedStage: validStage, highestStage: validStage };
+    }
+  }
+
+  public static async resetStageProgress(): Promise<void> {
+    try {
+      await AsyncStorage.setItem(STORAGE_KEYS.SAVED_STAGE, '1');
+    } catch {}
+  }
+
+  // --- Invite & Referrals System ---
   public static async getShareCount(): Promise<number> {
     try {
-      const val = await AsyncStorage.getItem(STORAGE_KEYS.SHARE_COUNT);
+      const val = await AsyncStorage.getItem(STORAGE_KEYS.INVITE_COUNT);
       return val ? parseInt(val, 10) || 0 : 0;
     } catch {
       return 0;
@@ -221,7 +266,7 @@ export class LocalGameRepository {
 
   /**
    * Awards player for inviting friends or sharing:
-   * 1. +250 Cyber Credits
+   * 1. +500 Cyber Credits
    * 2. Unlocks exclusive 'SOLAR_GOLD' skin
    * 3. Grants Headstart Nitro Boost perk for the next run
    */
@@ -231,7 +276,7 @@ export class LocalGameRepository {
     headstartNitroAwarded: boolean;
     totalCredits: number;
   }> {
-    const creditsAwarded = 250;
+    const creditsAwarded = 500;
     const currentCredits = await this.addCredits(creditsAwarded);
 
     const unlocked = await this.getUnlockedSkins();
@@ -245,7 +290,7 @@ export class LocalGameRepository {
 
     try {
       const count = await this.getShareCount();
-      await AsyncStorage.setItem(STORAGE_KEYS.SHARE_COUNT, (count + 1).toString());
+      await AsyncStorage.setItem(STORAGE_KEYS.INVITE_COUNT, (count + 1).toString());
     } catch {}
 
     return {

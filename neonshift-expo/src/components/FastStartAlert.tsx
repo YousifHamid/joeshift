@@ -110,7 +110,7 @@ export const FastStartAlert: React.FC<FastStartAlertProps> = ({ visible, onDismi
         {/* Action Copy */}
         <View style={styles.textStack}>
           <Text style={styles.primaryAction}>▲ SWIPE UP TO JUMP</Text>
-          <Text style={styles.secondaryAction}>⚡ HOLD UP TO NITRO BOOST</Text>
+          <Text style={styles.secondaryAction}>HOLD UP TO NITRO BOOST (+60%)</Text>
         </View>
 
         {/* Bottom Cyber Corner Brackets */}

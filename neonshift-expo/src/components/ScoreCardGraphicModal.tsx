@@ -35,12 +35,12 @@ export const ScoreCardGraphicModal: React.FC<ScoreCardGraphicModalProps> = ({
   const [copiedNotice, setCopiedNotice] = useState(false);
   const activeSkin = VEHICLE_SKINS[state.equippedSkin] || VEHICLE_SKINS[DEFAULT_SKIN_ID];
 
-  const shareText = `🚀 Can you beat my high score in JOESHIFT?\n\n` +
-    `⚡ SCORE: ${state.score.toLocaleString()} PTS\n` +
-    `📍 DISTANCE: ${state.distanceMeters}m (Stage ${state.currentStage})\n` +
-    `🔥 MAX COMBO: x${state.maxCombo.toFixed(1)}\n` +
-    `🛸 PILOT: ${gamerTag} [Craft: ${activeSkin.name}]\n\n` +
-    `Can you survive the hypersonic neon grid? Play now: https://joeshift.game/join\n\n` +
+  const shareText = `[RECORD] Can you beat my high score in JOESHIFT?\n\n` +
+    `SCORE: ${state.score.toLocaleString()} PTS\n` +
+    `DISTANCE: ${state.distanceMeters}m (Stage ${state.currentStage})\n` +
+    `MAX COMBO: x${state.maxCombo.toFixed(1)}\n` +
+    `PILOT: ${gamerTag} [Craft: ${activeSkin.name}]\n\n` +
+    `Can you survive the hypersonic neon grid? Play now: https://joeshift.game/join?ref=${gamerTag}\n\n` +
     `#JOESHIFT #BeatMyScore #CyberRunner #IndieGame`;
 
   const handleShareTwitter = async () => {
@@ -120,7 +120,7 @@ export const ScoreCardGraphicModal: React.FC<ScoreCardGraphicModalProps> = ({
           {copiedNotice && (
             <View style={styles.copiedBanner}>
               <Text style={styles.copiedBannerText}>
-                ✨ SCORE CARD COPIED! READY TO POST ON STORIES / FEED
+                [COPIED] SCORE CARD READY TO POST ON STORIES / FEED
               </Text>
             </View>
           )}
@@ -142,7 +142,7 @@ export const ScoreCardGraphicModal: React.FC<ScoreCardGraphicModalProps> = ({
                 </View>
 
                 <View style={[styles.skinPill, { borderColor: activeSkin.accentHex }]}>
-                  <Text style={styles.skinPillText}>🛸 {activeSkin.name}</Text>
+                  <Text style={styles.skinPillText}>CRAFT: {activeSkin.name}</Text>
                 </View>
               </View>
 
@@ -190,7 +190,7 @@ export const ScoreCardGraphicModal: React.FC<ScoreCardGraphicModalProps> = ({
 
               {/* Challenge Banner */}
               <View style={styles.challengeBox}>
-                <Text style={styles.challengeTitle}>🔥 BEAT MY FLIGHT RECORD 🔥</Text>
+                <Text style={styles.challengeTitle}>▲ BEAT MY FLIGHT RECORD ▲</Text>
                 <Text style={styles.challengeLink}>PLAY AT: joeshift.game/join</Text>
               </View>
 
@@ -212,7 +212,7 @@ export const ScoreCardGraphicModal: React.FC<ScoreCardGraphicModalProps> = ({
                 onPress={handleShareTwitter}
                 activeOpacity={0.8}
               >
-                <Text style={styles.socialBtnIcon}>𝕏</Text>
+                <Text style={styles.socialBtnIcon}>[X]</Text>
                 <Text style={styles.socialBtnText}>POST TO X (TWITTER)</Text>
               </TouchableOpacity>
 
@@ -222,7 +222,7 @@ export const ScoreCardGraphicModal: React.FC<ScoreCardGraphicModalProps> = ({
                 onPress={handleShareInstagram}
                 activeOpacity={0.8}
               >
-                <Text style={styles.socialBtnIcon}>📸</Text>
+                <Text style={styles.socialBtnIcon}>[IG]</Text>
                 <Text style={styles.socialBtnText}>SHARE TO INSTAGRAM</Text>
               </TouchableOpacity>
 
@@ -232,7 +232,7 @@ export const ScoreCardGraphicModal: React.FC<ScoreCardGraphicModalProps> = ({
                 onPress={handleSystemShare}
                 activeOpacity={0.8}
               >
-                <Text style={styles.socialBtnIcon}>⎘</Text>
+                <Text style={styles.socialBtnIcon}>➔</Text>
                 <Text style={styles.socialBtnText}>SHARE VIA MESSAGES / OTHER APPS</Text>
               </TouchableOpacity>
             </View>

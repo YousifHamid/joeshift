@@ -28,6 +28,10 @@ export default function App() {
   const [equippedSkin, setEquippedSkin] = useState<SkinId>(DEFAULT_SKIN_ID);
   const [hasHeadstartNitro, setHasHeadstartNitro] = useState<boolean>(false);
 
+  const [savedStage, setSavedStage] = useState<number>(1);
+  const [highestStage, setHighestStage] = useState<number>(1);
+  const [startStageToPlay, setStartStageToPlay] = useState<number>(1);
+
   const [settings, setSettings] = useState<GameSettings>({
     musicEnabled: true,
     sfxEnabled: true,
@@ -42,7 +46,7 @@ export default function App() {
   const [showRewards, setShowRewards] = useState(false);
 
   const loadUserData = async () => {
-    const [score, dist, tag, setts, records, creds, skins, equipped, headstart] = await Promise.all([
+    const [score, dist, tag, setts, records, creds, skins, equipped, headstart, savedStg, highestStg] = await Promise.all([
       LocalGameRepository.getBestScore(),
       LocalGameRepository.getBestDistance(),
       LocalGameRepository.getGamerTag(),
@@ -52,6 +56,8 @@ export default function App() {
       LocalGameRepository.getUnlockedSkins(),
       LocalGameRepository.getEquippedSkin(),
       LocalGameRepository.getHeadstartNitroPerk(),
+      LocalGameRepository.getSavedStage(),
+      LocalGameRepository.getHighestStage(),
     ]);
 
     setBestScore(score);
@@ -63,6 +69,8 @@ export default function App() {
     setUnlockedSkins(skins);
     setEquippedSkin(equipped);
     setHasHeadstartNitro(headstart);
+    setSavedStage(savedStg);
+    setHighestStage(highestStg);
   };
 
   useEffect(() => {
@@ -106,6 +114,11 @@ export default function App() {
     setHasHeadstartNitro(false);
   };
 
+  const handleResetProgress = async () => {
+    await LocalGameRepository.resetStageProgress();
+    await loadUserData();
+  };
+
   return (
     <View style={styles.container}>
       <StatusBar style="light" />
@@ -116,8 +129,14 @@ export default function App() {
           bestDistance={bestDistance}
           gamerTag={gamerTag}
           credits={credits}
+          savedStage={savedStage}
+          highestStage={highestStage}
           hasHeadstartNitro={hasHeadstartNitro}
-          onStartGame={() => setCurrentScreen('GAME')}
+          onStartGame={(stageToLaunch = 1) => {
+            setStartStageToPlay(stageToLaunch);
+            setCurrentScreen('GAME');
+          }}
+          onResetProgress={handleResetProgress}
           onOpenLeaderboard={() => setShowLeaderboard(true)}
           onOpenSettings={() => setShowSettings(true)}
           onOpenHangar={() => setShowHangar(true)}
@@ -130,6 +149,7 @@ export default function App() {
           settings={settings}
           equippedSkin={equippedSkin}
           hasHeadstartNitro={hasHeadstartNitro}
+          startStage={startStageToPlay}
           onConsumeHeadstartNitro={handleConsumeHeadstartNitro}
           onClaimShareReward={handleClaimShareReward}
           onReturnToMenu={() => {

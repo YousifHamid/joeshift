@@ -38,7 +38,7 @@ export const RewardModal: React.FC<RewardModalProps> = ({
       HapticsManager.collect();
       const result = await Share.share({
         title: 'JOESHIFT — Cyber Runner Invite',
-        message: `🚀 Play JOESHIFT with me! Shift lanes, blast obstacles, and master the hypersonic neon grid!\n\nUse Pilot Callsign [${gamerTag}] or join here to claim +250 Cyber Credits and an exclusive Solar Phoenix interceptor:\nhttps://joeshift.game/join`,
+        message: `[JOESHIFT] Play JOESHIFT with me! Shift lanes, blast obstacles, and master the hypersonic neon grid!\n\nUse Pilot Callsign [${gamerTag}] or join here to claim +500 Cyber Credits and an exclusive Solar Phoenix interceptor:\nhttps://joeshift.game/join?ref=${gamerTag}`,
       });
 
       // Award the player when returning from share sheet
@@ -76,7 +76,7 @@ export const RewardModal: React.FC<RewardModalProps> = ({
           {justClaimed && (
             <View style={styles.claimedBanner}>
               <Text style={styles.claimedBannerText}>
-                🎉 REWARD CLAIMED! +250 CREDITS & NITRO BOOST ARMED!
+                [PERK UNLOCKED] +500 CREDITS & NITRO BOOST ARMED!
               </Text>
             </View>
           )}
@@ -85,7 +85,7 @@ export const RewardModal: React.FC<RewardModalProps> = ({
             {/* Vault Balance Status */}
             <View style={styles.vaultPill}>
               <Text style={styles.vaultLabel}>VAULT BALANCE</Text>
-              <Text style={styles.vaultValue}>⚡ {credits.toLocaleString()} CREDITS</Text>
+              <Text style={styles.vaultValue}>[CR] {credits.toLocaleString()} CREDITS</Text>
             </View>
 
             {/* Perks & Rewards List */}
@@ -94,11 +94,11 @@ export const RewardModal: React.FC<RewardModalProps> = ({
             {/* Reward 1: Credits */}
             <View style={styles.rewardCard}>
               <View style={styles.rewardIconBadge}>
-                <Text style={styles.rewardIcon}>⚡</Text>
+                <Text style={styles.rewardIcon}>CR</Text>
               </View>
               <View style={styles.rewardInfo}>
                 <View style={styles.rewardTopLine}>
-                  <Text style={styles.rewardName}>+250 CYBER CREDITS</Text>
+                  <Text style={styles.rewardName}>+500 CYBER CREDITS</Text>
                   <Text style={styles.perkActiveBadge}>INSTANT</Text>
                 </View>
                 <Text style={styles.rewardDesc}>
@@ -110,7 +110,7 @@ export const RewardModal: React.FC<RewardModalProps> = ({
             {/* Reward 2: Exclusive Skin */}
             <View style={[styles.rewardCard, { borderColor: Colors.neonGold }]}>
               <View style={[styles.rewardIconBadge, { backgroundColor: 'rgba(255, 215, 0, 0.2)' }]}>
-                <Text style={styles.rewardIcon}>🛸</Text>
+                <Text style={[styles.rewardIcon, { color: Colors.neonGold }]}>SHIP</Text>
               </View>
               <View style={styles.rewardInfo}>
                 <View style={styles.rewardTopLine}>
@@ -128,7 +128,7 @@ export const RewardModal: React.FC<RewardModalProps> = ({
             {/* Reward 3: Temporary Nitro Headstart */}
             <View style={[styles.rewardCard, { borderColor: Colors.neonCyan }]}>
               <View style={[styles.rewardIconBadge, { backgroundColor: 'rgba(0, 240, 255, 0.2)' }]}>
-                <Text style={styles.rewardIcon}>🚀</Text>
+                <Text style={[styles.rewardIcon, { color: Colors.neonCyan }]}>NITRO</Text>
               </View>
               <View style={styles.rewardInfo}>
                 <View style={styles.rewardTopLine}>
@@ -166,7 +166,7 @@ export const RewardModal: React.FC<RewardModalProps> = ({
             onPress={handleShareAndClaim}
             activeOpacity={0.8}
           >
-            <Text style={styles.inviteButtonText}>⎘ INVITE FRIENDS & CLAIM REWARDS</Text>
+            <Text style={styles.inviteButtonText}>INVITE CADETS & CLAIM REWARDS ➔</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -315,7 +315,11 @@ const styles = StyleSheet.create({
     marginRight: 12,
   },
   rewardIcon: {
-    fontSize: 22,
+    fontFamily: 'monospace',
+    fontSize: 12,
+    fontWeight: '900',
+    color: Colors.neonCyan,
+    letterSpacing: 1,
   },
   rewardInfo: {
     flex: 1,

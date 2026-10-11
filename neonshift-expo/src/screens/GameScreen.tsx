@@ -29,6 +29,7 @@ interface GameScreenProps {
   settings: GameSettings;
   equippedSkin?: SkinId;
   hasHeadstartNitro?: boolean;
+  startStage?: number;
   onConsumeHeadstartNitro?: () => Promise<void>;
   onClaimShareReward?: () => Promise<void>;
   onReturnToMenu: () => void;
@@ -41,6 +42,7 @@ export const GameScreen: React.FC<GameScreenProps> = ({
   settings,
   equippedSkin = DEFAULT_SKIN_ID,
   hasHeadstartNitro = false,
+  startStage = 1,
   onConsumeHeadstartNitro,
   onClaimShareReward,
   onReturnToMenu,
@@ -135,6 +137,7 @@ export const GameScreen: React.FC<GameScreenProps> = ({
         HapticsManager.stageClear();
         SoundEffects.playStageClear();
         LocalGameRepository.addCredits(100);
+        LocalGameRepository.saveStageProgress(event.stage + 1);
         onRefreshRecords();
         setStageClearedInfo({ stage: event.stage });
         break;
@@ -152,7 +155,7 @@ export const GameScreen: React.FC<GameScreenProps> = ({
   useEffect(() => {
     const loop = new GameLoop(handleGameEvent);
     gameLoopRef.current = loop;
-    loop.start({ equippedSkin, hasHeadstartNitro });
+    loop.start({ equippedSkin, hasHeadstartNitro, startStage });
     if (hasHeadstartNitro && onConsumeHeadstartNitro) {
       onConsumeHeadstartNitro();
     }
@@ -204,12 +207,13 @@ export const GameScreen: React.FC<GameScreenProps> = ({
     };
 
     const { isNewBestScore, creditsEarned: earned } = await LocalGameRepository.saveRun(record);
+    await LocalGameRepository.saveStageProgress(finalState.currentStage);
     setIsNewBest(isNewBestScore);
     setCreditsEarned(earned);
     onRefreshRecords();
   };
 
-  const handleRestart = async () => {
+  const handleRestart = async (stageOverride?: number) => {
     setStageClearedInfo(null);
     setIsNewBest(false);
     setShowStartAlert(true);
@@ -217,7 +221,8 @@ export const GameScreen: React.FC<GameScreenProps> = ({
     if (hasPerk && onConsumeHeadstartNitro) {
       await onConsumeHeadstartNitro();
     }
-    gameLoopRef.current?.start({ equippedSkin, hasHeadstartNitro: hasPerk });
+    const launchStage = typeof stageOverride === 'number' ? stageOverride : startStage;
+    gameLoopRef.current?.start({ equippedSkin, hasHeadstartNitro: hasPerk, startStage: launchStage });
     lastTimeRef.current = performance.now();
     SoundEffects.resumeBgm();
   };

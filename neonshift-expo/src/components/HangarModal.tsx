@@ -62,10 +62,10 @@ export const HangarModal: React.FC<HangarModalProps> = ({
       HapticsManager.collision();
       Alert.alert(
         'INSUFFICIENT CREDITS',
-        `You need ${currentSkin.costCredits} Cyber Credits to unlock ${currentSkin.name}.\n\nShare JOESHIFT with friends to instantly earn +250 Credits!`,
+        `You need ${currentSkin.costCredits} Cyber Credits to unlock ${currentSkin.name}.\n\nInvite friends to JOESHIFT to instantly earn +500 Credits!`,
         [
           { text: 'Cancel', style: 'cancel' },
-          { text: '🎁 Share & Earn', onPress: onOpenShareReward },
+          { text: 'Invite & Earn (+500)', onPress: onOpenShareReward },
         ]
       );
       return;
@@ -102,7 +102,7 @@ export const HangarModal: React.FC<HangarModalProps> = ({
               onPress={onOpenShareReward}
               activeOpacity={0.7}
             >
-              <Text style={styles.vaultValue}>⚡ {credits.toLocaleString()} CR</Text>
+              <Text style={styles.vaultValue}>[CR] {credits.toLocaleString()}</Text>
               <Text style={styles.earnBadgeText}>+ GET MORE</Text>
             </TouchableOpacity>
           </View>
@@ -165,7 +165,7 @@ export const HangarModal: React.FC<HangarModalProps> = ({
                   { borderColor: currentSkin.accentHex, shadowColor: currentSkin.accentHex },
                 ]}
               >
-                <Text style={styles.craftIcon}>🛸</Text>
+                <Text style={[styles.craftIcon, { color: currentSkin.accentHex }]}>▲</Text>
               </View>
 
               {/* Color Swatch Indicators */}
@@ -249,7 +249,7 @@ export const HangarModal: React.FC<HangarModalProps> = ({
                   activeOpacity={0.8}
                 >
                   <Text style={[styles.actionBtnText, { color: '#000000' }]}>
-                    🎁 UNLOCK VIA SHARE
+                    UNLOCK VIA INVITE
                   </Text>
                 </TouchableOpacity>
 
@@ -458,7 +458,9 @@ const styles = StyleSheet.create({
     shadowRadius: 14,
   },
   craftIcon: {
-    fontSize: 38,
+    fontFamily: 'monospace',
+    fontSize: 32,
+    fontWeight: '900',
   },
   swatchRow: {
     flexDirection: 'row',

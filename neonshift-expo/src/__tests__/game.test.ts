@@ -319,12 +319,12 @@ test('Score Sharing: Beat My Score card formatting generates high score, distanc
   };
   const gamerTag = 'CYBER_ACE';
 
-  const shareText = `🚀 Can you beat my high score in JOESHIFT?\n\n` +
-    `⚡ SCORE: ${mockState.score.toLocaleString()} PTS\n` +
-    `📍 DISTANCE: ${mockState.distanceMeters}m (Stage ${mockState.currentStage})\n` +
-    `🔥 MAX COMBO: x${mockState.maxCombo.toFixed(1)}\n` +
-    `🛸 PILOT: ${gamerTag} [Craft: SOLAR PHOENIX]\n\n` +
-    `Can you survive the hypersonic neon grid? Play now: https://joeshift.game/join\n\n` +
+  const shareText = `[RECORD] Can you beat my high score in JOESHIFT?\n\n` +
+    `SCORE: ${mockState.score.toLocaleString()} PTS\n` +
+    `DISTANCE: ${mockState.distanceMeters}m (Stage ${mockState.currentStage})\n` +
+    `MAX COMBO: x${mockState.maxCombo.toFixed(1)}\n` +
+    `PILOT: ${gamerTag} [Craft: SOLAR PHOENIX]\n\n` +
+    `Can you survive the hypersonic neon grid? Play now: https://joeshift.game/join?ref=${gamerTag}\n\n` +
     `#JOESHIFT #BeatMyScore #CyberRunner #IndieGame`;
 
   assert.ok(shareText.includes('18,450 PTS'));
@@ -355,6 +355,15 @@ test('GameLoop: intro launch progress at start smoothly moves machine into fligh
   }
   const stateEnd = loop.toUiState(0);
   assert.strictEqual(stateEnd.introLaunchProgress, 1.0);
+});
+
+test('Stage Persistence & Continue: GameLoop initializes at selected checkpoint stage correctly', () => {
+  const loop = new GameLoop();
+  loop.start({ startStage: 3 });
+  const state = loop.toUiState(0);
+  assert.strictEqual(state.currentStage, 3);
+  assert.strictEqual(state.distanceMeters, 2500); // Stage 3 starts at 2500m
+  assert.strictEqual(state.stageTargetMeters, 4300);
 });
 
 

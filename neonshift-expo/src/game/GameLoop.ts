@@ -56,16 +56,28 @@ export class GameLoop {
     return this._status;
   }
 
-  public start(options?: { equippedSkin?: SkinId; hasHeadstartNitro?: boolean }): void {
+  public start(options?: {
+    equippedSkin?: SkinId;
+    hasHeadstartNitro?: boolean;
+    startStage?: number;
+  }): void {
     this.reset();
     this.introLaunchTimer = GameLoop.INTRO_LAUNCH_DURATION;
     if (options?.equippedSkin) {
       this.equippedSkin = options.equippedSkin;
     }
+    if (options?.startStage && options.startStage > 1) {
+      const startingStage = Math.min(StageManager.MAX_STAGES, Math.max(1, options.startStage));
+      const thresholds = StageManager.getThresholds();
+      this.totalDistance = thresholds[startingStage - 1];
+      this.lastStageCompleted = startingStage - 1;
+      this.stageCelebrationText = `STAGE ${startingStage} RESUMED`;
+      this.stageCelebrationTimer = 2.4;
+    }
     if (options?.hasHeadstartNitro) {
       this.headstartBoostTimer = 4.0;
       this.isBoosting = true;
-      this.stageCelebrationText = '🚀 HEADSTART NITRO ACTIVE!';
+      this.stageCelebrationText = 'NITRO HEADSTART ACTIVE';
       this.stageCelebrationTimer = 3.5;
       this.onEvent({ type: 'BoostStarted' });
     }
@@ -93,7 +105,7 @@ export class GameLoop {
     this.headstartBoostTimer = 1.6;
     this.isBoosting = true;
     const nextStageNum = this.lastStageCompleted + 1;
-    this.stageCelebrationText = `🚀 STAGE ${nextStageNum} ENGAGED!`;
+    this.stageCelebrationText = `STAGE ${nextStageNum} ENGAGED`;
     this.stageCelebrationTimer = 2.2;
     this._status = GameStatus.RUNNING;
     this.onEvent({ type: 'BoostStarted' });
@@ -251,7 +263,7 @@ export class GameLoop {
       this.lastStageCompleted = completedStage;
       this.ammo = Math.min(this.maxAmmo, this.ammo + 2); // Refill ammo on stage clear!
       this.scoreManager.addBonusScore(500); // +500 PTS Stage clear reward!
-      this.stageCelebrationText = `STAGE ${completedStage} CLEARED! 🏁`;
+      this.stageCelebrationText = `STAGE ${completedStage} CLEARED`;
       this.stageCelebrationTimer = 2.5;
       this.obstacleManager.clearNearby(GameConfig.PLAYER_Z - 5, GameConfig.PLAYER_Z + 35);
       this._status = GameStatus.PAUSED;

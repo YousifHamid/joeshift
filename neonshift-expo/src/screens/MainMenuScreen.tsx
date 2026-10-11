@@ -15,8 +15,11 @@ interface MainMenuScreenProps {
   bestDistance: number;
   gamerTag: string;
   credits: number;
+  savedStage?: number;
+  highestStage?: number;
   hasHeadstartNitro: boolean;
-  onStartGame: () => void;
+  onStartGame: (stage?: number) => void;
+  onResetProgress?: () => void;
   onOpenLeaderboard: () => void;
   onOpenSettings: () => void;
   onOpenHangar: () => void;
@@ -28,6 +31,8 @@ export const MainMenuScreen: React.FC<MainMenuScreenProps> = ({
   bestDistance,
   gamerTag,
   credits,
+  savedStage = 1,
+  highestStage = 1,
   hasHeadstartNitro,
   onStartGame,
   onOpenLeaderboard,
@@ -40,8 +45,8 @@ export const MainMenuScreen: React.FC<MainMenuScreenProps> = ({
   const handleShareGame = async () => {
     try {
       await Share.share({
-        title: 'JOESHIFT — Cyber Runner',
-        message: `⚡ Play JOESHIFT: Shift. Jump. Survive! High-octane cyber neon runner. My best score: ${bestScore.toLocaleString()} pts (${bestDistance}m)! Join here to claim +250 Credits: https://joeshift.game/join`,
+        title: 'JOESHIFT — Hypersonic Cyber Runner',
+        message: `[JOESHIFT] Shift. Jump. Survive! Hypersonic cyber neon runner.\nMy record: ${bestScore.toLocaleString()} PTS (${bestDistance}m)!\nJoin with my referral code [${gamerTag}] to claim +500 Cyber Credits: https://joeshift.game/join?ref=${gamerTag}`,
       });
     } catch {
       // Safe fallback
@@ -64,19 +69,37 @@ export const MainMenuScreen: React.FC<MainMenuScreenProps> = ({
           onPress={onOpenRewards}
           activeOpacity={0.8}
         >
-          <Text style={styles.creditsChipText}>⚡ {credits.toLocaleString()} CR</Text>
+          <Text style={styles.creditsChipText}>[CR] {credits.toLocaleString()}</Text>
         </TouchableOpacity>
       </View>
 
-      {/* Hero Header */}
+      {/* Hero Header with Record Hype */}
       <View style={styles.heroSection}>
         <Text style={styles.title}>JOESHIFT</Text>
         <Text style={styles.tagline}>SHIFT · JUMP · SURVIVE</Text>
 
+        {/* Hype Pilot Record Banner */}
         <View style={styles.recordBadge}>
-          <Text style={styles.recordLabel}>PERSONAL BEST</Text>
-          <Text style={styles.recordScore}>{bestScore.toLocaleString()} PTS</Text>
-          <Text style={styles.recordDist}>{bestDistance} METERS CLEARED</Text>
+          <View style={styles.recordHeaderRow}>
+            <Text style={styles.recordBadgePill}>★ PERSONAL BEST RECORD ★</Text>
+          </View>
+          <View style={styles.recordScoreRow}>
+            <Text style={styles.recordScore}>{bestScore.toLocaleString()}</Text>
+            <Text style={styles.recordScoreUnit}>PTS</Text>
+          </View>
+          <View style={styles.recordMetricsRow}>
+            <View style={styles.recordMetricItem}>
+              <Text style={styles.recordMetricLabel}>MAX DISTANCE</Text>
+              <Text style={styles.recordMetricVal}>{bestDistance.toLocaleString()}m</Text>
+            </View>
+            <View style={styles.recordMetricDivider} />
+            <View style={styles.recordMetricItem}>
+              <Text style={styles.recordMetricLabel}>TOP STAGE</Text>
+              <Text style={[styles.recordMetricVal, { color: Colors.neonGold }]}>
+                STAGE {Math.max(highestStage, savedStage)}
+              </Text>
+            </View>
+          </View>
         </View>
       </View>
 
@@ -84,17 +107,39 @@ export const MainMenuScreen: React.FC<MainMenuScreenProps> = ({
       <View style={styles.actionSection}>
         {hasHeadstartNitro && (
           <View style={styles.nitroBadge}>
-            <Text style={styles.nitroBadgeText}>🚀 NITRO HEADSTART ARMED (4.0s BOOST)</Text>
+            <Text style={styles.nitroBadgeText}>[NITRO HEADSTART ARMED - 4.0s BOOST]</Text>
           </View>
         )}
 
-        <TouchableOpacity
-          style={styles.playButton}
-          onPress={onStartGame}
-          activeOpacity={0.8}
-        >
-          <Text style={styles.playButtonText}>INITIATE RUN</Text>
-        </TouchableOpacity>
+        {/* Continue Stage Checkpoint vs New Run */}
+        {savedStage > 1 ? (
+          <View style={styles.continueContainer}>
+            <TouchableOpacity
+              style={styles.continueButton}
+              onPress={() => onStartGame(savedStage)}
+              activeOpacity={0.85}
+            >
+              <Text style={styles.continueButtonSub}>RESUME CHECKPOINT</Text>
+              <Text style={styles.continueButtonText}>CONTINUE STAGE {savedStage} ➔</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.newRunBtn}
+              onPress={() => onStartGame(1)}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.newRunBtnText}>START FROM STAGE 1</Text>
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <TouchableOpacity
+            style={styles.playButton}
+            onPress={() => onStartGame(1)}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.playButtonText}>INITIATE RUN ➔</Text>
+          </TouchableOpacity>
+        )}
 
         {/* Action Grid Row 1: Leaderboard & Hangar */}
         <View style={styles.buttonRow}>
@@ -111,7 +156,7 @@ export const MainMenuScreen: React.FC<MainMenuScreenProps> = ({
             onPress={onOpenHangar}
             activeOpacity={0.7}
           >
-            <Text style={[styles.secondaryBtnText, { color: Colors.neonCyan }]}>🛸 HANGAR</Text>
+            <Text style={[styles.secondaryBtnText, { color: Colors.neonCyan }]}>HANGAR</Text>
           </TouchableOpacity>
         </View>
 
@@ -141,7 +186,7 @@ export const MainMenuScreen: React.FC<MainMenuScreenProps> = ({
             onPress={onOpenRewards}
             activeOpacity={0.7}
           >
-            <Text style={styles.rewardShareBtnText}>🎁 INVITE & GET REWARDS (+250 CR)</Text>
+            <Text style={styles.rewardShareBtnText}>INVITE & GET REWARDS (+500 CR)</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -149,7 +194,7 @@ export const MainMenuScreen: React.FC<MainMenuScreenProps> = ({
             onPress={handleShareGame}
             activeOpacity={0.7}
           >
-            <Text style={styles.shareBtnText}>⎘ SHARE</Text>
+            <Text style={styles.shareBtnText}>SHARE</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -166,7 +211,7 @@ export const MainMenuScreen: React.FC<MainMenuScreenProps> = ({
                 <Text style={styles.bulletPoint}>• <Text style={styles.highlight}>SLIDE / SWIPE LEFT OR RIGHT</Text> — Effortlessly change lanes at any speed.</Text>
                 <Text style={styles.bulletPoint}>• <Text style={styles.highlight}>SWIPE UP</Text> — Jump over ground obstacles.</Text>
                 <Text style={styles.bulletPoint}>• <Text style={styles.highlight}>HOLD SCREEN (LONG PRESS)</Text> — Continuous touch engages Nitro Boost (+60% speed)!</Text>
-                <Text style={styles.bulletPoint}>• <Text style={styles.highlight}>DOUBLE-TAP OR 💥 BLASTER</Text> — Fire plasma cannon bolts to blast obstacles!</Text>
+                <Text style={styles.bulletPoint}>• <Text style={styles.highlight}>DOUBLE-TAP OR BLASTER</Text> — Fire plasma cannon bolts to blast obstacles!</Text>
                 <Text style={styles.bulletPoint}>• <Text style={styles.highlight}>TAP UPPER SCREEN</Text> — Instant simulation pause.</Text>
               </View>
 
@@ -285,42 +330,91 @@ const styles = StyleSheet.create({
     textShadowRadius: 8,
   },
   recordBadge: {
-    marginTop: 32,
+    marginTop: 26,
     paddingHorizontal: 20,
     paddingVertical: 14,
-    borderRadius: 12,
-    backgroundColor: 'rgba(16, 16, 36, 0.8)',
+    borderRadius: 16,
+    backgroundColor: 'rgba(16, 18, 42, 0.92)',
     borderWidth: 1.5,
-    borderColor: 'rgba(255, 255, 255, 0.12)',
+    borderColor: 'rgba(255, 215, 0, 0.45)',
     alignItems: 'center',
     width: '100%',
     maxWidth: 320,
+    shadowColor: Colors.neonGold,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.35,
+    shadowRadius: 12,
   },
-  recordLabel: {
+  recordHeaderRow: {
+    marginBottom: 6,
+  },
+  recordBadgePill: {
     fontFamily: 'monospace',
-    fontSize: 10,
-    color: Colors.textMuted,
+    fontSize: 9.5,
+    fontWeight: '900',
+    color: Colors.neonGold,
     letterSpacing: 2,
-    marginBottom: 4,
+    textTransform: 'uppercase',
+  },
+  recordScoreRow: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    gap: 6,
   },
   recordScore: {
     fontFamily: 'monospace',
-    fontSize: 26,
+    fontSize: 32,
     fontWeight: '900',
+    color: '#FFFFFF',
+    letterSpacing: 1.5,
+    textShadowColor: 'rgba(255, 215, 0, 0.75)',
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 10,
+  },
+  recordScoreUnit: {
+    fontFamily: 'monospace',
+    fontSize: 12,
+    fontWeight: '800',
     color: Colors.neonGold,
     letterSpacing: 1,
   },
-  recordDist: {
+  recordMetricsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    width: '100%',
+    marginTop: 10,
+    paddingTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  recordMetricItem: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  recordMetricDivider: {
+    width: 1,
+    height: 22,
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+  },
+  recordMetricLabel: {
     fontFamily: 'monospace',
-    fontSize: 11,
-    color: Colors.textSecondary,
-    letterSpacing: 1,
-    marginTop: 2,
+    fontSize: 8.5,
+    color: Colors.textMuted,
+    letterSpacing: 1.5,
+    marginBottom: 2,
+  },
+  recordMetricVal: {
+    fontFamily: 'monospace',
+    fontSize: 12,
+    fontWeight: '900',
+    color: Colors.neonCyan,
+    letterSpacing: 0.5,
   },
   actionSection: {
     width: '100%',
     alignItems: 'center',
-    gap: 14,
+    gap: 12,
   },
   nitroBadge: {
     backgroundColor: 'rgba(0, 240, 255, 0.2)',
@@ -339,6 +433,55 @@ const styles = StyleSheet.create({
     textShadowColor: Colors.neonCyan,
     textShadowOffset: { width: 0, height: 0 },
     textShadowRadius: 6,
+  },
+  continueContainer: {
+    width: '100%',
+    maxWidth: 320,
+    gap: 8,
+  },
+  continueButton: {
+    width: '100%',
+    paddingVertical: 14,
+    borderRadius: 14,
+    backgroundColor: '#00F0FF',
+    alignItems: 'center',
+    shadowColor: '#00F0FF',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.8,
+    shadowRadius: 18,
+    elevation: 8,
+  },
+  continueButtonSub: {
+    fontFamily: 'monospace',
+    fontSize: 9,
+    fontWeight: '800',
+    color: '#06060F',
+    letterSpacing: 1.5,
+    opacity: 0.8,
+  },
+  continueButtonText: {
+    fontFamily: 'monospace',
+    fontSize: 16,
+    fontWeight: '900',
+    color: '#06060F',
+    letterSpacing: 2,
+    marginTop: 2,
+  },
+  newRunBtn: {
+    width: '100%',
+    paddingVertical: 10,
+    borderRadius: 10,
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
+    alignItems: 'center',
+  },
+  newRunBtnText: {
+    fontFamily: 'monospace',
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#FFFFFF',
+    letterSpacing: 1.5,
   },
   playButton: {
     width: '100%',
