@@ -1,0 +1,3 @@
+<resources>
+    <style name="Theme.NeonShift" parent="android:Theme.Material.Light.NoActionBar" />
+</resources>

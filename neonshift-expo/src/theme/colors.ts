@@ -1,0 +1,17 @@
+export const Colors = {
+  background: '#06060F',
+  cardBg: 'rgba(16, 16, 36, 0.85)',
+  surface: '#0F0F23',
+  neonCyan: '#00F5FF',
+  neonMagenta: '#FF00E5',
+  neonPurple: '#7B2FFF',
+  neonGold: '#FFD700',
+  neonGreen: '#00FF66',
+  dangerRed: '#FF2965',
+  textPrimary: '#FFFFFF',
+  textSecondary: 'rgba(255, 255, 255, 0.7)',
+  textMuted: 'rgba(255, 255, 255, 0.45)',
+  gridLine: 'rgba(123, 47, 255, 0.35)',
+  gridGlow: 'rgba(0, 245, 255, 0.5)',
+  warningGlow: 'rgba(255, 41, 101, 0.7)',
+};
