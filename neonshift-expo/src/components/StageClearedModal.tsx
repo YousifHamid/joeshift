@@ -1,13 +1,6 @@
 import React from 'react';
-import {
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Colors } from '../theme/colors';
-import { DifficultyManager } from '../game/DifficultyManager';
-import { DifficultyTierLabels } from '../game/GameStatus';
 import { StageManager } from '../game/StageManager';
 
 interface StageClearedModalProps {
@@ -29,86 +22,81 @@ export const StageClearedModal: React.FC<StageClearedModalProps> = ({
 }) => {
   const nextStage = stage + 1;
   const nextStageInfo = StageManager.getStageInfo(distanceMeters + 1);
-  const nextTier = DifficultyManager.tierFor(nextStageInfo.stageTargetMeters);
-  const nextTierLabel = DifficultyTierLabels[nextTier] || 'GRID ZERO';
 
   return (
     <View style={styles.overlay}>
       <View style={styles.card}>
-        {/* Top Trophy Banner with Celebration Sparks */}
-        <View style={styles.trophyWrapper}>
-          <Text style={styles.sparkleIcon}>✨</Text>
-          <View style={styles.trophyRing}>
-            <Text style={styles.trophyIcon}>🏆</Text>
-          </View>
-          <Text style={styles.sparkleIcon}>✨</Text>
+        {/* Top Glossy Pill Badge (Inspired by reference Level Badge) */}
+        <View style={styles.topPill}>
+          <Text style={styles.topPillText}>STAGE {stage} CLEARED</Text>
         </View>
 
-        {/* Level Complete Headline */}
-        <Text style={styles.stageTitle}>STAGE {stage} COMPLETED!</Text>
-        <Text style={styles.stageSubtitle}>SECTOR CLEARED · HYPER-GRID CONQUERED</Text>
-
-        {/* Run Telemetry Grid */}
-        <View style={styles.statsRow}>
-          <View style={styles.statBox}>
-            <Text style={styles.statLabel}>DISTANCE</Text>
-            <Text style={styles.statVal}>{distanceMeters}m</Text>
+        {/* Hero Showcase (Trophy + Stage Score) */}
+        <View style={styles.heroBox}>
+          <View style={styles.trophyCircle}>
+            <Text style={styles.trophyIcon}>🏆</Text>
           </View>
+          <Text style={styles.scoreVal}>{score.toLocaleString()}</Text>
+          <Text style={styles.scoreLabel}>TOTAL POINTS</Text>
+        </View>
 
-          <View style={styles.statBox}>
-            <Text style={styles.statLabel}>TOTAL SCORE</Text>
-            <Text style={[styles.statVal, { color: Colors.neonGold }]}>
-              {score.toLocaleString()}
-            </Text>
+        {/* Quick Stats Pill Row */}
+        <View style={styles.statsPillRow}>
+          <View style={styles.statPill}>
+            <Text style={styles.statPillLabel}>DISTANCE</Text>
+            <Text style={styles.statPillVal}>{distanceMeters}m</Text>
           </View>
-
-          <View style={styles.statBox}>
-            <Text style={styles.statLabel}>PEAK COMBO</Text>
-            <Text style={[styles.statVal, { color: Colors.neonMagenta }]}>
+          <View style={styles.statPillDivider} />
+          <View style={styles.statPill}>
+            <Text style={styles.statPillLabel}>PEAK COMBO</Text>
+            <Text style={[styles.statPillVal, { color: Colors.neonMagenta }]}>
               x{maxCombo.toFixed(1)}
             </Text>
           </View>
         </View>
 
-        {/* Level Clear Rewards Awarded */}
+        {/* Reward Tokens (Clean 3-item capsule row matching reference) */}
         <View style={styles.rewardsSection}>
-          <Text style={styles.rewardsHeader}>// REWARDS SECURED</Text>
+          <Text style={styles.sectionTitle}>REWARDS</Text>
+          <View style={styles.rewardTokensRow}>
+            {/* Cyber Credits */}
+            <View style={styles.rewardToken}>
+              <Text style={styles.tokenIcon}>⚡</Text>
+              <Text style={styles.tokenVal}>+{creditsBonus}</Text>
+              <Text style={styles.tokenSub}>CREDITS</Text>
+            </View>
 
-          <View style={styles.rewardPill}>
-            <Text style={styles.rewardIcon}>⚡</Text>
-            <Text style={styles.rewardText}>+{creditsBonus} CYBER CREDITS (VAULT ADDED)</Text>
-          </View>
+            {/* Plasma Ammo */}
+            <View style={styles.rewardToken}>
+              <Text style={styles.tokenIcon}>💥</Text>
+              <Text style={styles.tokenVal}>+2</Text>
+              <Text style={styles.tokenSub}>AMMO</Text>
+            </View>
 
-          <View style={styles.rewardPill}>
-            <Text style={styles.rewardIcon}>💥</Text>
-            <Text style={styles.rewardText}>+2 PLASMA CANNON AMMO REFILLED</Text>
-          </View>
-
-          <View style={styles.rewardPill}>
-            <Text style={styles.rewardIcon}>⭐</Text>
-            <Text style={styles.rewardText}>+500 PTS SECTOR CLEAR BONUS</Text>
+            {/* Clear Bonus */}
+            <View style={styles.rewardToken}>
+              <Text style={styles.tokenIcon}>⭐</Text>
+              <Text style={styles.tokenVal}>+500</Text>
+              <Text style={styles.tokenSub}>BONUS</Text>
+            </View>
           </View>
         </View>
 
-        {/* Next Level Target Briefing */}
-        <View style={styles.nextStageBox}>
-          <View style={styles.nextStageHeaderRow}>
-            <Text style={styles.nextStageLabel}>NEXT OBJECTIVE</Text>
-            <Text style={styles.tierBadge}>{nextTierLabel}</Text>
-          </View>
-          <Text style={styles.nextStageTitle}>STAGE {nextStage}</Text>
-          <Text style={styles.nextStageDesc}>
-            Target: {nextStageInfo.stageTargetMeters.toLocaleString()}m threshold
+        {/* Next Stage Teaser Pill */}
+        <View style={styles.nextTeaserPill}>
+          <Text style={styles.nextTeaserLabel}>NEXT OBJECTIVE:</Text>
+          <Text style={styles.nextTeaserVal}>
+            STAGE {nextStage} ({nextStageInfo.stageTargetMeters.toLocaleString()}m)
           </Text>
         </View>
 
-        {/* Primary Action Button: NEXT LEVEL */}
+        {/* Big Juicy CTA Button (Inspired by reference PLAY button) */}
         <TouchableOpacity
-          style={styles.nextLevelButton}
+          style={styles.playBtn}
           onPress={onNextLevel}
-          activeOpacity={0.8}
+          activeOpacity={0.85}
         >
-          <Text style={styles.nextLevelText}>NEXT LEVEL ➔</Text>
+          <Text style={styles.playBtnText}>NEXT LEVEL ➔</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -118,200 +106,214 @@ export const StageClearedModal: React.FC<StageClearedModalProps> = ({
 const styles = StyleSheet.create({
   overlay: {
     ...StyleSheet.absoluteFill,
-    backgroundColor: 'rgba(4, 4, 14, 0.94)',
+    backgroundColor: 'rgba(6, 6, 20, 0.92)',
     justifyContent: 'center',
     alignItems: 'center',
     zIndex: 90,
   },
   card: {
-    width: '90%',
-    maxWidth: 400,
-    backgroundColor: 'rgba(12, 14, 32, 0.98)',
-    borderRadius: 22,
+    width: '88%',
+    maxWidth: 350,
+    backgroundColor: 'rgba(22, 20, 52, 0.98)',
+    borderRadius: 28,
     borderWidth: 2,
-    borderColor: Colors.neonGold,
-    padding: 22,
+    borderColor: 'rgba(255, 215, 0, 0.6)',
+    paddingTop: 24,
+    paddingBottom: 22,
+    paddingHorizontal: 18,
     alignItems: 'center',
     shadowColor: Colors.neonGold,
-    shadowOffset: { width: 0, height: 0 },
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.6,
+    shadowRadius: 20,
+    elevation: 10,
+  },
+  topPill: {
+    position: 'absolute',
+    top: -18,
+    backgroundColor: Colors.neonGold,
+    paddingHorizontal: 22,
+    paddingVertical: 8,
+    borderRadius: 20,
+    borderBottomWidth: 3,
+    borderBottomColor: '#B8860B',
+    shadowColor: Colors.neonGold,
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.7,
-    shadowRadius: 24,
+    shadowRadius: 8,
+    elevation: 6,
   },
-  trophyWrapper: {
-    flexDirection: 'row',
+  topPillText: {
+    fontFamily: 'monospace',
+    fontSize: 14,
+    fontWeight: '900',
+    color: '#0A0A1A',
+    letterSpacing: 1.5,
+  },
+  heroBox: {
     alignItems: 'center',
-    gap: 12,
-    marginBottom: 8,
+    marginTop: 8,
+    marginBottom: 12,
   },
-  trophyRing: {
-    width: 68,
-    height: 68,
-    borderRadius: 34,
-    backgroundColor: 'rgba(255, 215, 0, 0.2)',
-    borderWidth: 2,
+  trophyCircle: {
+    width: 62,
+    height: 62,
+    borderRadius: 31,
+    backgroundColor: 'rgba(255, 215, 0, 0.15)',
+    borderWidth: 1.5,
     borderColor: Colors.neonGold,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: Colors.neonGold,
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.8,
-    shadowRadius: 14,
+    marginBottom: 6,
   },
   trophyIcon: {
-    fontSize: 34,
+    fontSize: 30,
   },
-  sparkleIcon: {
-    fontSize: 20,
-  },
-  stageTitle: {
+  scoreVal: {
     fontFamily: 'monospace',
-    fontSize: 24,
+    fontSize: 34,
     fontWeight: '900',
-    color: '#FFFFFF',
-    letterSpacing: 2,
+    color: Colors.neonGold,
+    letterSpacing: 1.5,
     textShadowColor: Colors.neonGold,
     textShadowOffset: { width: 0, height: 0 },
     textShadowRadius: 10,
-    marginTop: 4,
   },
-  stageSubtitle: {
-    fontFamily: 'monospace',
-    fontSize: 10,
-    fontWeight: '700',
-    color: '#FFFFFF',
-    letterSpacing: 1,
-    opacity: 0.85,
-    marginTop: 4,
-    marginBottom: 16,
-  },
-  statsRow: {
-    flexDirection: 'row',
-    width: '100%',
-    gap: 8,
-    marginBottom: 16,
-  },
-  statBox: {
-    flex: 1,
-    backgroundColor: 'rgba(6, 6, 18, 0.7)',
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.12)',
-    paddingVertical: 8,
-    paddingHorizontal: 6,
-    alignItems: 'center',
-  },
-  statLabel: {
-    fontFamily: 'monospace',
-    fontSize: 8.5,
-    fontWeight: 'bold',
-    color: '#FFFFFF',
-    opacity: 0.75,
-    letterSpacing: 0.5,
-    marginBottom: 2,
-  },
-  statVal: {
-    fontFamily: 'monospace',
-    fontSize: 14,
-    fontWeight: '900',
-    color: Colors.neonCyan,
-    letterSpacing: 0.5,
-  },
-  rewardsSection: {
-    width: '100%',
-    marginBottom: 16,
-  },
-  rewardsHeader: {
-    fontFamily: 'monospace',
-    fontSize: 10,
-    fontWeight: 'bold',
-    color: '#FFFFFF',
-    letterSpacing: 1,
-    marginBottom: 8,
-    opacity: 0.85,
-  },
-  rewardPill: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255, 215, 0, 0.12)',
-    borderColor: 'rgba(255, 215, 0, 0.4)',
-    borderWidth: 1,
-    borderRadius: 8,
-    paddingHorizontal: 10,
-    paddingVertical: 7,
-    marginBottom: 6,
-    gap: 8,
-  },
-  rewardIcon: {
-    fontSize: 14,
-  },
-  rewardText: {
-    fontFamily: 'monospace',
-    fontSize: 10.5,
-    fontWeight: 'bold',
-    color: '#FFFFFF',
-    letterSpacing: 0.5,
-  },
-  nextStageBox: {
-    width: '100%',
-    backgroundColor: 'rgba(0, 240, 255, 0.1)',
-    borderWidth: 1,
-    borderColor: 'rgba(0, 240, 255, 0.4)',
-    borderRadius: 12,
-    padding: 12,
-    marginBottom: 18,
-  },
-  nextStageHeaderRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 4,
-  },
-  nextStageLabel: {
+  scoreLabel: {
     fontFamily: 'monospace',
     fontSize: 9.5,
     fontWeight: 'bold',
     color: '#FFFFFF',
-    letterSpacing: 1,
-    opacity: 0.85,
-  },
-  tierBadge: {
-    fontFamily: 'monospace',
-    fontSize: 9,
-    fontWeight: 'bold',
-    color: Colors.neonCyan,
-    borderWidth: 1,
-    borderColor: Colors.neonCyan,
-    borderRadius: 4,
-    paddingHorizontal: 6,
-    paddingVertical: 1,
-  },
-  nextStageTitle: {
-    fontFamily: 'monospace',
-    fontSize: 16,
-    fontWeight: '900',
-    color: '#FFFFFF',
+    opacity: 0.75,
     letterSpacing: 1.5,
+    marginTop: 1,
   },
-  nextStageDesc: {
+  statsPillRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-around',
+    backgroundColor: 'rgba(10, 10, 28, 0.7)',
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+    width: '100%',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    marginBottom: 14,
+  },
+  statPill: {
+    alignItems: 'center',
+    flex: 1,
+  },
+  statPillDivider: {
+    width: 1,
+    height: 24,
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+  },
+  statPillLabel: {
+    fontFamily: 'monospace',
+    fontSize: 8.5,
+    color: '#FFFFFF',
+    opacity: 0.7,
+    letterSpacing: 0.5,
+    marginBottom: 2,
+  },
+  statPillVal: {
+    fontFamily: 'monospace',
+    fontSize: 14,
+    fontWeight: '900',
+    color: Colors.neonCyan,
+  },
+  rewardsSection: {
+    width: '100%',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  sectionTitle: {
     fontFamily: 'monospace',
     fontSize: 10,
+    fontWeight: '800',
     color: '#FFFFFF',
-    opacity: 0.8,
-    marginTop: 2,
+    opacity: 0.75,
+    letterSpacing: 1.2,
+    marginBottom: 8,
   },
-  nextLevelButton: {
+  rewardTokensRow: {
+    flexDirection: 'row',
+    width: '100%',
+    gap: 8,
+    justifyContent: 'space-between',
+  },
+  rewardToken: {
+    flex: 1,
+    backgroundColor: 'rgba(255, 255, 255, 0.06)',
+    borderRadius: 14,
+    borderWidth: 1.2,
+    borderColor: 'rgba(255, 215, 0, 0.35)',
+    paddingVertical: 8,
+    paddingHorizontal: 4,
+    alignItems: 'center',
+  },
+  tokenIcon: {
+    fontSize: 18,
+    marginBottom: 2,
+  },
+  tokenVal: {
+    fontFamily: 'monospace',
+    fontSize: 13,
+    fontWeight: '900',
+    color: '#FFFFFF',
+  },
+  tokenSub: {
+    fontFamily: 'monospace',
+    fontSize: 7.5,
+    fontWeight: 'bold',
+    color: Colors.neonGold,
+    letterSpacing: 0.5,
+    marginTop: 1,
+  },
+  nextTeaserPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    backgroundColor: 'rgba(0, 240, 255, 0.08)',
+    borderColor: 'rgba(0, 240, 255, 0.25)',
+    borderWidth: 1,
+    borderRadius: 10,
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    width: '100%',
+    marginBottom: 16,
+  },
+  nextTeaserLabel: {
+    fontFamily: 'monospace',
+    fontSize: 9,
+    color: '#FFFFFF',
+    opacity: 0.7,
+  },
+  nextTeaserVal: {
+    fontFamily: 'monospace',
+    fontSize: 10,
+    fontWeight: '900',
+    color: Colors.neonCyan,
+  },
+  playBtn: {
     width: '100%',
     backgroundColor: Colors.neonGold,
-    borderRadius: 14,
-    paddingVertical: 16,
+    borderRadius: 22,
+    paddingVertical: 14,
     alignItems: 'center',
+    justifyContent: 'center',
+    borderBottomWidth: 4,
+    borderBottomColor: '#B8860B',
     shadowColor: Colors.neonGold,
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.8,
-    shadowRadius: 16,
-    elevation: 8,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.7,
+    shadowRadius: 10,
+    elevation: 6,
   },
-  nextLevelText: {
+  playBtnText: {
     fontFamily: 'monospace',
     fontSize: 16,
     fontWeight: '900',
