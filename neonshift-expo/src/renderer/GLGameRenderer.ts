@@ -158,8 +158,8 @@ export class GLGameRenderer {
     // 7. Draw Blaster Projectiles
     this.drawProjectiles(state, project);
 
-    // 8. Draw Player Speeder / Runner
-    this.drawPlayer(state, project, dt);
+    // 8. Draw Player Speeder / Runner (with perspective vanishing point alignment)
+    this.drawPlayer(state, project, dt, vanishX, horizonY);
 
     // 9. Draw Active Thruster & Collection Particles
     this.updateAndDrawParticles(dt);
@@ -631,7 +631,9 @@ export class GLGameRenderer {
   private drawPlayer(
     state: GameUiState,
     project: (worldX: number, z: number) => { x: number; y: number },
-    dt: number
+    dt: number,
+    vanishX: number = this.screenWidth / 2,
+    horizonY: number = this.screenHeight * 0.35
   ): void {
     // 1. True physical 3D world projection with dynamic start launch surge
     const introProgress = state.introLaunchProgress ?? 1.0;
@@ -676,33 +678,54 @@ export class GLGameRenderer {
     const shadowColor: [number, number, number, number] = [0.0, 0.0, 0.02, shadowAlpha];
     this.addCircle(px, shadowCenterY, shadowW / 2, shadowColor, [0, 0, 0, 0], 20);
 
-    // 2b. Digital Neon Road Speed Wake & Light Stream (Reference Art Style!)
+    // 2b. Digital Neon Road Speed Wake & Light Stream in TRUE 3D Perspective!
     const activeSkin = VEHICLE_SKINS[state.equippedSkin] || VEHICLE_SKINS[DEFAULT_SKIN_ID];
     const skinPalette = activeSkin.palette;
 
     const isOverdrive = state.activePowerUps.includes(PowerUpType.OVERDRIVE);
     const isBoosting = state.isBoosting;
     const isHeadstart = state.headstartActive;
-    const wakeLen = (isBoosting ? (isHeadstart ? 250 : 200) : 130) * (1.0 - altRatio * 0.5);
-    const wakeHalfW = 32 * squashX;
+
+    // Wake extends in 3D world Z behind the vehicle down towards the camera
+    const zWakeStart = effectivePlayerZ - 0.7;
+    const wakeWorldLength = (isBoosting ? (isHeadstart ? 7.2 : 6.0) : 4.4) * (1.0 - altRatio * 0.4);
+    const zWakeEnd = Math.max(0.4, zWakeStart - wakeWorldLength);
+    const wakeWorldHalfW = 0.62 * squashX; // ~56% of lane width (lane width is 2.2)
+
+    // Project all 4 corners into screen space using the camera projection:
+    // This guarantees 100% mathematical perspective alignment with the lane lines on left, center, and right!
+    const wakeFrontL = project(state.playerX - wakeWorldHalfW, zWakeStart);
+    const wakeFrontR = project(state.playerX + wakeWorldHalfW, zWakeStart);
+    const wakeRearL = project(state.playerX - wakeWorldHalfW * 1.15, zWakeEnd);
+    const wakeRearR = project(state.playerX + wakeWorldHalfW * 1.15, zWakeEnd);
+
     const wakeColorNear: [number, number, number, number] = isOverdrive
       ? [1.0, 0.85, 0.0, 0.5]
       : [skinPalette.wakeColor[0], skinPalette.wakeColor[1], skinPalette.wakeColor[2], isBoosting ? 0.7 : skinPalette.wakeColor[3]];
-    this.addPolygon([
-      { x: px - wakeHalfW, y: shadowCenterY - 10 },
-      { x: px + wakeHalfW, y: shadowCenterY - 10 },
-      { x: px + wakeHalfW * 1.35, y: shadowCenterY + wakeLen },
-      { x: px - wakeHalfW * 1.35, y: shadowCenterY + wakeLen },
-    ], wakeColorNear);
 
-    // Dynamic digital pixel bars streaming along the wake
+    this.addPolygon([wakeFrontL, wakeFrontR, wakeRearR, wakeRearL], wakeColorNear);
+
+    // Dynamic digital pixel bars streaming along the wake in true 3D perspective
+    const zSpan = zWakeStart - zWakeEnd;
     for (let b = 0; b < 6; b++) {
-      const bitOffset = ((this.runTime * (isBoosting ? 520 : 340) + b * 26) % wakeLen);
-      const bitY = shadowCenterY + bitOffset;
-      const bitW = (14 + (b % 3) * 8) * (1.0 - bitOffset / wakeLen);
-      const bitAlpha = (1.0 - bitOffset / wakeLen) * 0.85;
-      const bitX = px + ((b % 2 === 0 ? -1 : 1) * (5 + (b * 5) % 18));
-      this.addQuad(bitX - bitW / 2, bitY, bitW, 3.5, [skinPalette.finColor[0], skinPalette.finColor[1], skinPalette.finColor[2], bitAlpha], [1, 1, 1, bitAlpha]);
+      const cycleOffset = ((this.runTime * (isBoosting ? 18 : 12) + b * 1.1) % zSpan);
+      const bitZ = zWakeStart - cycleOffset;
+      const bitAlpha = (1.0 - cycleOffset / zSpan) * 0.85;
+      const bitWWorld = 0.30 + (b % 3) * 0.12;
+      const bitXWorld = state.playerX + ((b % 2 === 0 ? -1 : 1) * 0.20);
+
+      const pBitL = project(bitXWorld - bitWWorld / 2, bitZ);
+      const pBitR = project(bitXWorld + bitWWorld / 2, bitZ);
+      const bitHeightPx = 3.5;
+
+      this.addQuad(
+        pBitL.x,
+        pBitL.y - bitHeightPx / 2,
+        pBitR.x - pBitL.x,
+        bitHeightPx,
+        [skinPalette.finColor[0], skinPalette.finColor[1], skinPalette.finColor[2], bitAlpha],
+        [1, 1, 1, bitAlpha]
+      );
     }
 
     // 3. Active Power-up Shield Bubble
@@ -725,14 +748,16 @@ export class GLGameRenderer {
     // 4. HEROIC 3D CYBERPUNK INTERCEPTOR SPEEDER CRAFT (DOUBLED 2X SIZE)
     const wingSpan = 60 * squashX;
     const bankLift = roll * 22;
+    // Perspective slant vector matching the road rays from vanishing point:
+    const laneSlant = (px - vanishX) / Math.max(1, shadowCenterY - horizonY);
 
-    // Coordinate points strictly matching the physical 3D hitbox
-    const nose = { x: px + roll * 10, y: py - noseForwardPx };
-    const leftWingTip = { x: px - wingSpan - roll * 14, y: py + rearBehindPx * 0.4 + bankLift };
-    const rightWingTip = { x: px + wingSpan - roll * 14, y: py + rearBehindPx * 0.4 - bankLift };
-    const leftWingRoot = { x: px - wingSpan * 0.42, y: py + rearBehindPx + bankLift * 0.4 };
-    const rightWingRoot = { x: px + wingSpan * 0.42, y: py + rearBehindPx - bankLift * 0.4 };
-    const centerEngine = { x: px, y: py + rearBehindPx * 0.65 };
+    // Coordinate points strictly matching the physical 3D hitbox with perspective alignment:
+    const nose = { x: px - noseForwardPx * laneSlant + roll * 10, y: py - noseForwardPx };
+    const leftWingTip = { x: px - wingSpan + rearBehindPx * 0.4 * laneSlant - roll * 14, y: py + rearBehindPx * 0.4 + bankLift };
+    const rightWingTip = { x: px + wingSpan + rearBehindPx * 0.4 * laneSlant - roll * 14, y: py + rearBehindPx * 0.4 - bankLift };
+    const leftWingRoot = { x: px - wingSpan * 0.42 + rearBehindPx * laneSlant, y: py + rearBehindPx + bankLift * 0.4 };
+    const rightWingRoot = { x: px + wingSpan * 0.42 + rearBehindPx * laneSlant, y: py + rearBehindPx - bankLift * 0.4 };
+    const centerEngine = { x: px + rearBehindPx * 0.65 * laneSlant, y: py + rearBehindPx * 0.65 };
 
     // Underwing Aerodynamic Wings (swept back stealth design) - Custom Skin
     const wingColor: [number, number, number, number] = skinPalette.wingColor;
@@ -741,8 +766,8 @@ export class GLGameRenderer {
 
     // Stealth Inner Armor Fuselage (dark carbon titanium) - Custom Skin
     const armorColor: [number, number, number, number] = skinPalette.armorColor;
-    const leftArmor = { x: px - wingSpan * 0.48, y: py + rearBehindPx * 0.45 + bankLift * 0.5 };
-    const rightArmor = { x: px + wingSpan * 0.48, y: py + rearBehindPx * 0.45 - bankLift * 0.5 };
+    const leftArmor = { x: px - wingSpan * 0.48 + rearBehindPx * 0.45 * laneSlant, y: py + rearBehindPx * 0.45 + bankLift * 0.5 };
+    const rightArmor = { x: px + wingSpan * 0.48 + rearBehindPx * 0.45 * laneSlant, y: py + rearBehindPx * 0.45 - bankLift * 0.5 };
     this.addPolygon([nose, rightArmor, centerEngine, leftArmor], armorColor);
 
     // Glowing Wingtip Stabilizers / Plasma fins - Custom Skin
@@ -754,18 +779,18 @@ export class GLGameRenderer {
     this.addLine(rightWingTip.x, rightWingTip.y, rightWingRoot.x, rightWingRoot.y, finAccentColor, finColor);
 
     // Elevated Cockpit Canopy (radiant photon visor) - Custom Skin
-    const visorTop = { x: px + roll * 6, y: py - noseForwardPx * 0.45 };
-    const visorBot = { x: px, y: py + rearBehindPx * 0.35 };
+    const visorTop = { x: px - noseForwardPx * 0.45 * laneSlant + roll * 6, y: py - noseForwardPx * 0.45 };
+    const visorBot = { x: px + rearBehindPx * 0.35 * laneSlant, y: py + rearBehindPx * 0.35 };
     const visorL = { x: px - 20 * squashX, y: py + bankLift * 0.3 };
     const visorR = { x: px + 20 * squashX, y: py - bankLift * 0.3 };
     this.addPolygon([visorTop, visorR, visorBot, visorL], skinPalette.visorColor);
     this.addCircle(px, py, 13, [1, 1, 1, 1], skinPalette.visorGlowColor, 14);
 
-    // 5. Dual Reactive Plasma Thruster Turbines with dynamic flame length & nitro boost
+    // 5. Dual Reactive Plasma Thruster Turbines with dynamic flame length & perspective angle
     const boostExtra = isBoosting ? (isHeadstart ? 55 : 45) : 0;
     const flameBaseLen = (isOverdrive ? 65 : 36) + boostExtra + Math.sin(this.runTime * 32) * (isBoosting ? 14 : 8);
-    const leftEngineX = px - 30 * squashX - roll * 6;
-    const rightEngineX = px + 30 * squashX - roll * 6;
+    const leftEngineX = px - 30 * squashX + rearBehindPx * laneSlant - roll * 6;
+    const rightEngineX = px + 30 * squashX + rearBehindPx * laneSlant - roll * 6;
     const engineY = py + rearBehindPx;
 
     const engineRingColor: [number, number, number, number] = isBoosting
@@ -774,7 +799,7 @@ export class GLGameRenderer {
     this.addCircle(leftEngineX, engineY, isBoosting ? 14.0 : 11.5, [1, 1, 1, 1], engineRingColor, 14);
     this.addCircle(rightEngineX, engineY, isBoosting ? 14.0 : 11.5, [1, 1, 1, 1], engineRingColor, 14);
 
-    // Pulsing Afterburner Jet Flame Cones (extra radiant when boosting)
+    // Pulsing Afterburner Jet Flame Cones slanting along lane perspective
     const jetColorOuter: [number, number, number, number] = isOverdrive
       ? [1.0, 0.84, 0.0, 0.95]
       : isBoosting
@@ -782,26 +807,26 @@ export class GLGameRenderer {
       : skinPalette.jetOuterColor;
     const jetColorCore: [number, number, number, number] = skinPalette.jetCoreColor;
 
-    // Left Jet Flame
+    // Left Jet Flame - tips slant with lane perspective
     const flameWidth = isBoosting ? 13.0 : 9.5;
-    const leftTip = { x: leftEngineX, y: engineY + flameBaseLen };
+    const leftTip = { x: leftEngineX + flameBaseLen * laneSlant, y: engineY + flameBaseLen };
     this.addPolygon(
       [{ x: leftEngineX - flameWidth, y: engineY }, { x: leftEngineX + flameWidth, y: engineY }, leftTip],
       jetColorOuter
     );
     this.addPolygon(
-      [{ x: leftEngineX - flameWidth * 0.45, y: engineY }, { x: leftEngineX + flameWidth * 0.45, y: engineY }, { x: leftEngineX, y: engineY + flameBaseLen * 0.6 }],
+      [{ x: leftEngineX - flameWidth * 0.45, y: engineY }, { x: leftEngineX + flameWidth * 0.45, y: engineY }, { x: leftEngineX + flameBaseLen * 0.6 * laneSlant, y: engineY + flameBaseLen * 0.6 }],
       jetColorCore
     );
 
-    // Right Jet Flame
-    const rightTip = { x: rightEngineX, y: engineY + flameBaseLen };
+    // Right Jet Flame - tips slant with lane perspective
+    const rightTip = { x: rightEngineX + flameBaseLen * laneSlant, y: engineY + flameBaseLen };
     this.addPolygon(
       [{ x: rightEngineX - flameWidth, y: engineY }, { x: rightEngineX + flameWidth, y: engineY }, rightTip],
       jetColorOuter
     );
     this.addPolygon(
-      [{ x: rightEngineX - flameWidth * 0.45, y: engineY }, { x: rightEngineX + flameWidth * 0.45, y: engineY }, { x: rightEngineX, y: engineY + flameBaseLen * 0.6 }],
+      [{ x: rightEngineX - flameWidth * 0.45, y: engineY }, { x: rightEngineX + flameWidth * 0.45, y: engineY }, { x: rightEngineX + flameBaseLen * 0.6 * laneSlant, y: engineY + flameBaseLen * 0.6 }],
       jetColorCore
     );
 
